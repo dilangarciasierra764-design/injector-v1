@@ -15,7 +15,13 @@ object Mem {
         return try {
             synchronized(lock) {
                 ch.position(addr)
-                if (ch.read(bb) != size) null else bb.rewind() as ByteBuffer
+                var n = 0
+                while (n < size) {
+                    val r = ch.read(bb)
+                    if (r <= 0) break
+                    n += r
+                }
+                if (n != size) null else { bb.rewind(); bb }
             }
         } catch (e: Exception) { null }
     }
@@ -44,5 +50,5 @@ object Mem {
         return a
     }
 
-    fun valid(a: Long) = a > 0x1000 && a < 0x7FFFFFFFFFFF
+    fun valid(a: Long) = a > 0x1000 && a < 0x7FFFFFFFFFFFL && (a and 3L) == 0L
 }
