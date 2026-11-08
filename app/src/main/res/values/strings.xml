@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">VNI</string>
-    <string name="acc_desc">Gestos para tap y pull del aim</string>
+    <string name="app_name">vni</string>
+    <string name="acc_desc">vni: gestos para el aim</string>
 </resources>
