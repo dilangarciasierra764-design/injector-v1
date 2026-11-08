@@ -9,7 +9,9 @@ import android.view.View
 
 class EspView(c: Context) : View(c) {
 
-    companion object { var enabled = true }
+    companion object {
+        @Volatile var enabled = true
+    }
 
     private val box = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
