@@ -4,18 +4,24 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Gravity
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import kotlin.concurrent.thread
 
 class MainActivity : Activity() {
 
     override fun onCreate(b: Bundle?) {
         super.onCreate(b)
+
+        if (Build.VERSION.SDK_INT >= 33)
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
+
         val pad = (16 * resources.displayMetrics.density).toInt()
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -65,6 +71,22 @@ class MainActivity : Activity() {
         root.addView(Button(this).apply {
             text = "3 · conceder root"
             setOnClickListener { thread { Root.sh("id"); runOnUiThread { refresh() } } }
+        })
+
+        root.addView(Button(this).apply {
+            text = "cargar offsets"
+            setOnClickListener {
+                thread {
+                    val ok = Offsets.load()
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            if (ok) "offsets: ${Offsets.source}" else "no se pudo leer offsets.json",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
         })
 
         root.addView(Button(this).apply {
