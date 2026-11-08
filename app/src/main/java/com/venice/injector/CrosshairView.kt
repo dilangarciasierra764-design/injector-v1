@@ -16,11 +16,11 @@ class CrosshairView(c: Context) : View(c) {
     private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = 3f
-        color = Color.argb(220, 0, 255, 128)
+        color = Color.argb(200, 0, 255, 128)
     }
-
     private val dot = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.rgb(0, 255, 128)
+        style = Paint.Style.FILL
+        color = Color.argb(220, 255, 255, 255)
     }
 
     override fun onDraw(canvas: Canvas) {
