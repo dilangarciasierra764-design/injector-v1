@@ -7,19 +7,26 @@ object Offsets {
     const val ARRAY_HEADER = 0x20L
     const val MAX_PLAYERS = 60
 
-    @Volatile var GAME_FACADE = 0L
-    @Volatile var MATCH = 0L
-    @Volatile var CAMERA = 0L
-    @Volatile var VIEW_MATRIX = 0L
-    @Volatile var LOCAL = 0L
-    @Volatile var LIST = 0L
-    @Volatile var COUNT = 0L
-    @Volatile var ENTITY = 0L
-    @Volatile var POSITION = 0L
-    @Volatile var HEAD = 0L
-    @Volatile var TEAM = 0L
-    @Volatile var HEALTH = 0L
-    @Volatile var DEAD = 0L
+    // ============================================================
+    //  RELLENA AQUÍ. Todo en hexadecimal y con la L al final.
+    //  Mientras un valor esté en 0L, el panel dirá "offsets: faltan".
+    // ============================================================
+
+    @Volatile var GAME_FACADE = 0L   // estático: facade / GameFacade
+    @Volatile var MATCH = 0L         // facade -> match actual
+    @Volatile var CAMERA = 0L        // match -> camera
+    @Volatile var VIEW_MATRIX = 0L   // camera -> matriz de vista
+    @Volatile var LOCAL = 0L         // match -> jugador local
+    @Volatile var LIST = 0L          // match -> array de jugadores
+    @Volatile var COUNT = 0L         // match -> número de jugadores
+    @Volatile var ENTITY = 0L        // jugador -> entidad
+    @Volatile var POSITION = 0L      // entidad -> posición (pies)
+    @Volatile var HEAD = 0L          // entidad -> posición (cabeza)
+    @Volatile var TEAM = 0L          // jugador -> equipo
+    @Volatile var HEALTH = 0L        // jugador -> vida
+    @Volatile var DEAD = 0L          // jugador -> byte de muerto
+
+    // ============================================================
 
     @Volatile var source = ""
 
@@ -35,6 +42,24 @@ object Offsets {
         ENTITY != 0L && POSITION != 0L && HEAD != 0L && TEAM != 0L &&
         HEALTH != 0L && DEAD != 0L
 
+    fun missing(): String {
+        val m = ArrayList<String>(13)
+        if (GAME_FACADE == 0L) m.add("GAME_FACADE")
+        if (MATCH == 0L) m.add("MATCH")
+        if (CAMERA == 0L) m.add("CAMERA")
+        if (VIEW_MATRIX == 0L) m.add("VIEW_MATRIX")
+        if (LOCAL == 0L) m.add("LOCAL")
+        if (LIST == 0L) m.add("LIST")
+        if (COUNT == 0L) m.add("COUNT")
+        if (ENTITY == 0L) m.add("ENTITY")
+        if (POSITION == 0L) m.add("POSITION")
+        if (HEAD == 0L) m.add("HEAD")
+        if (TEAM == 0L) m.add("TEAM")
+        if (HEALTH == 0L) m.add("HEALTH")
+        if (DEAD == 0L) m.add("DEAD")
+        return m.joinToString(", ")
+    }
+
     fun load(): Boolean {
         for (p in candidates) {
             val txt = Root.sh("cat $p 2>/dev/null")
@@ -43,7 +68,8 @@ object Offsets {
                 apply(txt)
                 source = p
                 return isReady()
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+            }
         }
         return false
     }
