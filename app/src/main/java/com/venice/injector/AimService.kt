@@ -11,7 +11,9 @@ class AimService : AccessibilityService() {
         @Volatile var instance: AimService? = null
     }
 
-    override fun onServiceConnected() { instance = this }
+    override fun onServiceConnected() {
+        instance = this
+    }
 
     override fun onDestroy() {
         instance = null
@@ -23,31 +25,49 @@ class AimService : AccessibilityService() {
     override fun onInterrupt() {}
 
     fun tap(x: Float, y: Float) {
-        val p = Path().apply { moveTo(x, y) }
+        val p = Path()
+        p.moveTo(x, y)
         dispatchGesture(
             GestureDescription.Builder()
                 .addStroke(GestureDescription.StrokeDescription(p, 0L, 40L))
-                .build(), null, null
+                .build(),
+            null,
+            null
         )
     }
 
     fun swipe(x1: Float, y1: Float, x2: Float, y2: Float, ms: Long) {
-        val p = Path().apply { moveTo(x1, y1); lineTo(x2, y2) }
+        val p = Path()
+        p.moveTo(x1, y1)
+        p.lineTo(x2, y2)
         dispatchGesture(
             GestureDescription.Builder()
                 .addStroke(GestureDescription.StrokeDescription(p, 0L, ms))
-                .build(), null, null
+                .build(),
+            null,
+            null
         )
     }
 
     fun swipeCb(x1: Float, y1: Float, x2: Float, y2: Float, ms: Long, done: () -> Unit) {
-        val p = Path().apply { moveTo(x1, y1); lineTo(x2, y2) }
+        val p = Path()
+        p.moveTo(x1, y1)
+        p.lineTo(x2, y2)
         val g = GestureDescription.Builder()
             .addStroke(GestureDescription.StrokeDescription(p, 0L, ms))
             .build()
-        dispatchGesture(g, object : GestureDescription.GestureResultCallback() {
-            override fun onCompleted(d: GestureDescription?) = done()
-            override fun onCancelled(d: GestureDescription?) = done()
-        }, null)
+        dispatchGesture(
+            g,
+            object : GestureResultCallback() {
+                override fun onCompleted(gestureDescription: GestureDescription?) {
+                    done()
+                }
+
+                override fun onCancelled(gestureDescription: GestureDescription?) {
+                    done()
+                }
+            },
+            null
+        )
     }
 }
