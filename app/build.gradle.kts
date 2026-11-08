@@ -16,10 +16,10 @@ android {
     }
 
     buildTypes {
-        debug {
+        getByName("debug") {
             isMinifyEnabled = false
         }
-        release {
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -36,4 +36,7 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+}
+
+dependencies {
 }
