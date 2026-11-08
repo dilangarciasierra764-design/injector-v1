@@ -14,14 +14,25 @@ object Esp {
 
     fun start(width: Int, height: Int) {
         if (running) return
-        w = width; h = height
+        w = width
+        h = height
         running = true
-        Thread {
+        val t = Thread {
             while (running) {
-                try { tick() } catch (e: Exception) { error = e.message ?: "err" }
-                Thread.sleep(if (error.isEmpty()) 16 else 120)
+                try {
+                    tick()
+                } catch (e: Exception) {
+                    error = e.message ?: "err"
+                }
+                try {
+                    Thread.sleep(if (error.isEmpty()) 16L else 120L)
+                } catch (e: InterruptedException) {
+                    return@Thread
+                }
             }
-        }.apply { isDaemon = true }.start()
+        }
+        t.isDaemon = true
+        t.start()
     }
 
     fun stop() {
@@ -31,14 +42,26 @@ object Esp {
     }
 
     private fun tick() {
-        if (!Root.ready) { error = "sin root"; return }
-        if (!Offsets.isReady()) { error = "offsets"; return }
+        if (!Root.ready) {
+            error = "sin root"
+            return
+        }
+        if (!Offsets.isReady()) {
+            error = "offsets"
+            return
+        }
 
         val facade = Mem.u64(Root.base + Offsets.GAME_FACADE)
-        if (!Mem.valid(facade)) { error = "facade"; return }
+        if (!Mem.valid(facade)) {
+            error = "facade"
+            return
+        }
 
         val match = Mem.u64(facade + Offsets.MATCH)
-        if (!Mem.valid(match)) { error = "sin partida"; return }
+        if (!Mem.valid(match)) {
+            error = "sin partida"
+            return
+        }
 
         val cam = Mem.u64(match + Offsets.CAMERA)
         if (!Mem.valid(cam)) return
@@ -52,16 +75,20 @@ object Esp {
 
         val list = Mem.u64(match + Offsets.LIST)
         val count = Mem.i32(match + Offsets.COUNT)
-        if (!Mem.valid(list) || count <= 0) { error = "sin lista"; return }
+        if (!Mem.valid(list) || count <= 0) {
+            error = "sin lista"
+            return
+        }
 
-        val out = ArrayList<Enemy>(32)
+        val n = count.coerceAtMost(Offsets.MAX_PLAYERS)
+        val out = ArrayList<Enemy>(n)
 
-        for (i in 0 until count.coerceAtMost(Offsets.MAX_PLAYERS)) {
+        for (i in 0 until n) {
             val p = Mem.u64(list + Offsets.ARRAY_HEADER + i * 8L)
             if (!Mem.valid(p)) continue
             if (p == local) continue
             if (Mem.u8(p + Offsets.DEAD) != 0) continue
-            if (Mem.i32(p + Offsets.TEAM) == myTeam && myTeam != -1) continue
+            if (myTeam != -1 && Mem.i32(p + Offsets.TEAM) == myTeam) continue
 
             val ent = Mem.u64(p + Offsets.ENTITY)
             if (!Mem.valid(ent)) continue
@@ -70,10 +97,10 @@ object Esp {
             val head = Mem.vec3(ent + Offsets.HEAD) ?: continue
 
             val sf = matrix.w2s(feet, w, h) ?: continue
-            val sh = matrix.w2s(head, w, h) ?: continue
+            val shp = matrix.w2s(head, w, h) ?: continue
 
             val dist = me?.let { it.sub(feet).len().toInt() } ?: 0
-            out.add(Enemy(sh[0], sh[1], sf[1], Mem.i32(p + Offsets.HEALTH), dist))
+            out.add(Enemy(shp[0], shp[1], sf[1], Mem.i32(p + Offsets.HEALTH), dist))
         }
 
         nearest = out.minByOrNull { it.dist }
